@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import {PropertiesPanel} from "./PropertiesPanel.gen";
+import {PropertiesPanel} from "./PropertiesPanel/PropertiesPanel.gen";
 
 function App() {
     return (
