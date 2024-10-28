@@ -11,21 +11,30 @@ VALUES (123, 'hello');
 
 CREATE TABLE spacing_values
 (
-    id                        SERIAL PRIMARY KEY,
-    margin_left               TEXT,
-    is_margin_left_focused    BOOLEAN,
-    margin_right              TEXT,
-    is_margin_right_focused   BOOLEAN,
-    margin_top                TEXT,
-    is_margin_top_focused     BOOLEAN,
-    margin_bottom             TEXT,
-    is_margin_bottom_focused  BOOLEAN,
-    padding_left              TEXT,
-    is_padding_left_focused   BOOLEAN,
-    padding_right             TEXT,
-    is_padding_right_focused  BOOLEAN,
-    padding_top               TEXT,
-    is_padding_top_focused    BOOLEAN,
-    padding_bottom            TEXT,
-    is_padding_bottom_focused BOOLEAN
+    id             SERIAL PRIMARY KEY,
+    margin_left    TEXT,
+    margin_right   TEXT,
+    margin_top     TEXT,
+    margin_bottom  TEXT,
+    padding_left   TEXT,
+    padding_right  TEXT,
+    padding_top    TEXT,
+    padding_bottom TEXT
 );
+
+INSERT INTO spacing_values (margin_left,
+                            margin_right,
+                            margin_top,
+                            margin_bottom,
+                            padding_left,
+                            padding_right,
+                            padding_top,
+                            padding_bottom)
+VALUES ('',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '');

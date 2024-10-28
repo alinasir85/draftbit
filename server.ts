@@ -35,114 +35,50 @@ const setupApp = (client: Client): express.Application => {
         }
     });
 
-    app.post("/spacing-values", async (req, res) => {
-        const {
-            id,
-            marginLeft,
-            isMarginLeftFocused,
-            marginRight,
-            isMarginRightFocused,
-            marginTop,
-            isMarginTopFocused,
-            marginBottom,
-            isMarginBottomFocused,
-            paddingLeft,
-            isPaddingLeftFocused,
-            paddingRight,
-            isPaddingRightFocused,
-            paddingTop,
-            isPaddingTopFocused,
-            paddingBottom,
-            isPaddingBottomFocused
-        } = req.body;
+    app.patch("/spacing-values/:id", async (req, res) => {
+        const {id} = req.params;
+        const fieldsToUpdate = req.body;
+
+        const validFields = [
+            'marginLeft', 'marginRight', 'marginTop', 'marginBottom',
+            'paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom',
+        ];
+
+        const updates = Object.entries(fieldsToUpdate).filter(([key, value]) =>
+            validFields.includes(key) && value !== undefined
+        );
+
+        if (updates.length === 0) {
+            return res.status(400).json({error: "No valid fields to update"});
+        }
+
+        const setClauses = updates.map(([key], index) => {
+            const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+            return `${dbField} = $${index + 1}`;
+        });
+
+        const queryParams = updates.map(([, value]) => value);
+        queryParams.push(id);
+
+        const query = `
+            UPDATE spacing_values
+            SET ${setClauses.join(", ")}
+            WHERE id = $${queryParams.length}
+        RETURNING id;
+    `;
 
         try {
-            let result;
-            if (id) {
-                result = await client.query(`
-                    UPDATE spacing_values
-                    SET margin_left               = $1,
-                        is_margin_left_focused    = $2,
-                        margin_right              = $3,
-                        is_margin_right_focused   = $4,
-                        margin_top                = $5,
-                        is_margin_top_focused     = $6,
-                        margin_bottom             = $7,
-                        is_margin_bottom_focused  = $8,
-                        padding_left              = $9,
-                        is_padding_left_focused   = $10,
-                        padding_right             = $11,
-                        is_padding_right_focused  = $12,
-                        padding_top               = $13,
-                        is_padding_top_focused    = $14,
-                        padding_bottom            = $15,
-                        is_padding_bottom_focused = $16
-                    WHERE id = $17
-                    RETURNING id
-                `, [
-                    marginLeft,
-                    isMarginLeftFocused,
-                    marginRight,
-                    isMarginRightFocused,
-                    marginTop,
-                    isMarginTopFocused,
-                    marginBottom,
-                    isMarginBottomFocused,
-                    paddingLeft,
-                    isPaddingLeftFocused,
-                    paddingRight,
-                    isPaddingRightFocused,
-                    paddingTop,
-                    isPaddingTopFocused,
-                    paddingBottom,
-                    isPaddingBottomFocused,
-                    id
-                ]);
-            } else {
-                result = await client.query(`
-                    INSERT INTO spacing_values (margin_left,
-                                                is_margin_left_focused,
-                                                margin_right,
-                                                is_margin_right_focused,
-                                                margin_top,
-                                                is_margin_top_focused,
-                                                margin_bottom,
-                                                is_margin_bottom_focused,
-                                                padding_left,
-                                                is_padding_left_focused,
-                                                padding_right,
-                                                is_padding_right_focused,
-                                                padding_top,
-                                                is_padding_top_focused,
-                                                padding_bottom,
-                                                is_padding_bottom_focused)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-                    RETURNING id
-                `, [
-                    marginLeft,
-                    isMarginLeftFocused,
-                    marginRight,
-                    isMarginRightFocused,
-                    marginTop,
-                    isMarginTopFocused,
-                    marginBottom,
-                    isMarginBottomFocused,
-                    paddingLeft,
-                    isPaddingLeftFocused,
-                    paddingRight,
-                    isPaddingRightFocused,
-                    paddingTop,
-                    isPaddingTopFocused,
-                    paddingBottom,
-                    isPaddingBottomFocused
-                ]);
+            const result = await client.query(query, queryParams);
+            if (result.rowCount === 0) {
+                return res.status(404).json({error: "Record not found"});
             }
-            res.json({message: "Operation successful", id: result.rows[0].id});
+            res.json({message: "Update successful", id: result.rows[0].id});
         } catch (error) {
-            console.error("Error processing spacing values:", error);
+            console.error("Error updating spacing values:", error);
             res.status(500).json({error: "Internal server error"});
         }
     });
+
 
     return app;
 };

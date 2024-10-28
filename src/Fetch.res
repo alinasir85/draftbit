@@ -34,9 +34,7 @@ let fetchJson = (~headers=Js.Dict.empty(), url: string): Js.Promise.t<Js.Json.t>
     }
   )
 
-let postJson = (~headers=Js.Dict.empty(), ~body: option<Js.Json.t>, url: string): Js.Promise.t<
-  Js.Json.t,
-> => {
+let patchJson = (~body: option<Js.Json.t>, url: string): Js.Promise.t<Js.Json.t> => {
   let jsonBody = switch body {
   | None => ""
   | Some(b) => Js.Json.stringify(b)
@@ -47,7 +45,7 @@ let postJson = (~headers=Js.Dict.empty(), ~body: option<Js.Json.t>, url: string)
     url,
     {
       headers: updatedHeaders,
-      method: "POST",
+      method: "PATCH",
       body: Some(jsonBody),
     },
   ) |> Js.Promise.then_(res =>

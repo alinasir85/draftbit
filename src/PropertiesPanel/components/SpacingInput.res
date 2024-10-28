@@ -17,15 +17,14 @@ let make = (~value: string, ~setValue: (string => string) => unit, ~className=""
   }
 
   React.useEffect1(() => {
-    switch value {
-    | "" => None
-    | nonEmptyValue => {
-        let (num, extractedUnit) = nonEmptyValue->extractValueAndUnit
-        setNumericValue(_ => num)
-        setUnit(_ => extractedUnit)
-        setShowSelect(_ => true)
-        None
-      }
+    if Js.Nullable.isNullable(Js.Nullable.fromOption(Some(value))) || value === "" {
+      None
+    } else {
+      let (num, extractedUnit) = value->extractValueAndUnit
+      setNumericValue(_ => num)
+      setUnit(_ => extractedUnit)
+      setShowSelect(_ => true)
+      None
     }
   }, [value])
 
